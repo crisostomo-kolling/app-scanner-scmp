@@ -25,7 +25,7 @@ if exist "%OUT_DIR%" rmdir /s /q "%OUT_DIR%"
 mkdir "%OUT_DIR%"
 
 echo Compilando...
-javac -cp "%OSGI_JAR%" -d "%OUT_DIR%" "%MODULE_DIR%src\main\java\com\trt\scannertombos\web\internal\ScannerTombosActivator.java"
+javac --release 8 -cp "%OSGI_JAR%" -d "%OUT_DIR%" "%MODULE_DIR%src\main\java\com\trt\scannertombos\web\internal\ScannerTombosActivator.java"
 if errorlevel 1 (
     echo ERRO: falha na compilacao.
     exit /b 1

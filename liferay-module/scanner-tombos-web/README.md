@@ -29,12 +29,27 @@ Abra um terminal (cmd/PowerShell) e rode:
 javac -version
 ```
 
-Se der erro "comando não encontrado", instale um JDK (por exemplo o
-[Eclipse Temurin](https://adoptium.net/), gratuito) e tente de novo.
+Se der erro "comando não encontrado" (só existe um Java de execução, sem o compilador), instale
+um JDK:
+
+1. Acesse [adoptium.net](https://adoptium.net/) (Eclipse Temurin, gratuito e oficial).
+2. Baixe o instalador **.msi** da versão **JDK 11 (LTS)** para Windows x64 — combina bem com o
+   Java que o Liferay 7.3 costuma usar.
+3. Rode o instalador. Na tela de opções, **marque** "Set JAVA_HOME variable" e "Add to PATH" (o
+   instalador do Temurin já vem com essas caixinhas, só não vêm marcadas por padrão).
+4. **Feche e abra um novo terminal** (o PATH só atualiza em janelas novas) e confirme:
+   ```bash
+   javac -version
+   ```
+   Deve responder algo como `javac 11.0.x`.
+
+O `build.bat` compila com a flag `--release 8`, então o `.jar` gerado funciona tanto em Liferay
+rodando com Java 8 quanto Java 11 — não precisa se preocupar em casar a versão exata do JDK
+instalado com a do servidor.
 
 *(Observação: eu não tenho um JDK disponível no ambiente onde estou rodando agora, então não
 consegui compilar e testar o `.jar` por aqui — você vai rodar o `build.bat` na sua própria
-máquina, que deve ter o JDK usado no dia a dia de vocês com Liferay.)*
+máquina.)*
 
 ## 1. Gerar o .jar
 
