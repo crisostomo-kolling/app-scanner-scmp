@@ -1,15 +1,31 @@
 @echo off
-setlocal
+setlocal enabledelayedexpansion
 
 set MODULE_DIR=%~dp0
 set OSGI_JAR=%MODULE_DIR%org.osgi.core-6.0.0.jar
 set OUT_DIR=%MODULE_DIR%build
 set OUT_JAR=%MODULE_DIR%scanner-tombos-web-1.0.0.jar
 
+set JAVAC_CMD=javac
+set JAR_CMD=jar
+
 where javac >nul 2>nul
 if errorlevel 1 (
-    echo ERRO: javac nao encontrado. Instale um JDK ^(ex: Eclipse Temurin^) e tente de novo.
-    exit /b 1
+    echo AVISO: javac nao encontrado no PATH. Procurando instalacao do JDK nas pastas usuais...
+    set "FOUND_JAVAC="
+    for /f "delims=" %%F in ('dir /b /s "C:\Program Files\Eclipse Adoptium\javac.exe" 2^>nul') do set "FOUND_JAVAC=%%F"
+    if not defined FOUND_JAVAC (
+        for /f "delims=" %%F in ('dir /b /s "C:\Program Files\Java\javac.exe" 2^>nul') do set "FOUND_JAVAC=%%F"
+    )
+    if not defined FOUND_JAVAC (
+        echo ERRO: javac nao encontrado nem no PATH nem nas pastas usuais de instalacao do JDK.
+        echo Feche esta janela do terminal, abra uma NOVA ^(ou faca logoff/login^) para o PATH atualizar, e tente de novo.
+        exit /b 1
+    )
+    set "JAVAC_CMD=!FOUND_JAVAC!"
+    for %%F in ("!FOUND_JAVAC!") do set "JDK_BIN=%%~dpF"
+    set "JAR_CMD=!JDK_BIN!jar.exe"
+    echo Usando JDK encontrado em: !JDK_BIN!
 )
 
 if not exist "%OSGI_JAR%" (
@@ -25,7 +41,7 @@ if exist "%OUT_DIR%" rmdir /s /q "%OUT_DIR%"
 mkdir "%OUT_DIR%"
 
 echo Compilando...
-javac --release 8 -cp "%OSGI_JAR%" -d "%OUT_DIR%" "%MODULE_DIR%src\main\java\com\trt\scannertombos\web\internal\ScannerTombosActivator.java"
+"!JAVAC_CMD!" --release 8 -cp "%OSGI_JAR%" -d "%OUT_DIR%" "%MODULE_DIR%src\main\java\com\trt\scannertombos\web\internal\ScannerTombosActivator.java"
 if errorlevel 1 (
     echo ERRO: falha na compilacao.
     exit /b 1
@@ -35,7 +51,7 @@ if exist "%OUT_JAR%" del "%OUT_JAR%"
 
 echo Empacotando %OUT_JAR%...
 pushd "%MODULE_DIR%"
-jar cfm "%OUT_JAR%" MANIFEST.MF -C build . -C . static
+"!JAR_CMD!" cfm "%OUT_JAR%" MANIFEST.MF -C build . -C . static
 popd
 
 echo.

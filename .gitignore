@@ -1,1 +1,6 @@
 .claude/settings.local.json
+
+# Artefatos gerados por liferay-module/scanner-tombos-web/build.bat
+liferay-module/scanner-tombos-web/build/
+liferay-module/scanner-tombos-web/org.osgi.core-6.0.0.jar
+liferay-module/scanner-tombos-web/*.jar
