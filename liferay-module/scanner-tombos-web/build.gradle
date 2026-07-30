@@ -1,7 +1,0 @@
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    compileOnly group: "org.osgi", name: "org.osgi.service.component.annotations", version: "1.4.0"
-}

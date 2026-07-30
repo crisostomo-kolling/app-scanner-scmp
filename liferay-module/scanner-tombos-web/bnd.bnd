@@ -1,7 +1,0 @@
-Bundle-Name: TRT - Scanner de Tombos (Recursos Estaticos)
-Bundle-SymbolicName: com.trt.scannertombos.web
-Bundle-Version: 1.0.0
-Bundle-Description: Serve os arquivos estaticos do PWA Scanner de Tombos via OSGi HTTP Whiteboard
-
--includeresource: static=static
--sources: false

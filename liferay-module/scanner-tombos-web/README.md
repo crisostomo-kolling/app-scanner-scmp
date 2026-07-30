@@ -1,75 +1,90 @@
 # scanner-tombos-web (módulo OSGi Liferay)
 
-Módulo OSGi que serve os arquivos do PWA [Scanner de Tombos](../../README.md) diretamente
-pelo Liferay, em `/scanner-tombos/*`, usando o padrão **HTTP Whiteboard** do OSGi (spec 140).
-Testado para Liferay Portal CE 7.3.7 GA8.
+Serve os arquivos do PWA [Scanner de Tombos](../../README.md) direto pelo Liferay, em
+`/scanner-tombos/*`, usando o padrão **HTTP Whiteboard** do OSGi. Testado para Liferay Portal
+CE 7.3.7 GA8.
 
-Não há nenhuma lógica Java real aqui — `ScannerTombosResourceComponent` é só um componente
-"marcador" que registra a pasta `static/` (empacotada dentro do próprio bundle, veja
-`bnd.bnd` → `-includeresource: static=static`) como recurso HTTP estático.
+Esse módulo **não usa Gradle nem Blade CLI** — só o JDK (que já vem com `javac` e `jar`) para
+gerar um único arquivo `.jar`, que depois você instala direto pelo navegador, sem precisar de
+acesso ao servidor por SSH/RDP.
 
-## Estrutura
+## O que tem aqui
 
 ```
-bnd.bnd                          cabeçalhos OSGi do bundle + inclusão da pasta static/
-build.gradle                     dependência apenas das anotações do OSGi Declarative Services
-src/main/java/.../ScannerTombosResourceComponent.java   componente que registra o recurso
-static/                          cópia dos arquivos do PWA (index.html, css/, js/, etc.)
+MANIFEST.MF        cabeçalhos do bundle OSGi (nome, versão, classe de ativação)
+src/.../ScannerTombosActivator.java   registra static/ como recurso HTTP, sem lógica de negócio
+static/             cópia dos arquivos do PWA (index.html, css/, js/, etc.)
+build.bat           script que compila e empacota tudo em um .jar
 ```
 
-`static/` é uma **cópia** dos arquivos da raiz deste repositório. Sempre que alterar o app
+`static/` é uma **cópia** dos arquivos da raiz do repositório. Sempre que alterar o app
 (`index.html`, `css/style.css`, `js/app.js`, etc.), copie os arquivos atualizados para dentro
-de `static/` aqui antes de gerar um novo build do módulo.
+de `static/` aqui antes de gerar um novo `.jar`.
 
-## 1. Colocar este módulo dentro do seu projeto Liferay
+## Pré-requisito: JDK instalado
 
-Se você já tem (ou vai criar) um Liferay Workspace/Blade com uma pasta `modules/`, copie a
-pasta inteira `scanner-tombos-web/` para dentro de `modules/`:
-
-```bash
-cp -r liferay-module/scanner-tombos-web /caminho/do/seu/liferay-workspace/modules/
-```
-
-Se ainda não tem nenhum workspace, o Blade CLI cria um em segundos:
+Abra um terminal (cmd/PowerShell) e rode:
 
 ```bash
-blade init trt-liferay-workspace
-cd trt-liferay-workspace
-cp -r /caminho/deste/repo/liferay-module/scanner-tombos-web modules/
+javac -version
 ```
 
-## 2. Build e deploy
+Se der erro "comando não encontrado", instale um JDK (por exemplo o
+[Eclipse Temurin](https://adoptium.net/), gratuito) e tente de novo.
 
-Dentro do workspace, com o Liferay 7.3.7 já rodando e o Blade configurado apontando para o
-servidor (`blade server start` ou apontando para uma instância remota):
+*(Observação: eu não tenho um JDK disponível no ambiente onde estou rodando agora, então não
+consegui compilar e testar o `.jar` por aqui — você vai rodar o `build.bat` na sua própria
+máquina, que deve ter o JDK usado no dia a dia de vocês com Liferay.)*
 
-```bash
-./gradlew :modules:scanner-tombos-web:deploy
-```
+## 1. Gerar o .jar
 
-Isso compila o bundle e copia o `.jar` gerado para a pasta de auto-deploy do Liferay
-(`[LIFERAY_HOME]/deploy`), que instala e ativa o módulo em segundos.
+Dentro da pasta `liferay-module/scanner-tombos-web`, dando duplo-clique em `build.bat` (ou
+rodando `build.bat` no cmd). O script:
 
-Alternativa manual, sem Gradle/Workspace: gerar o jar (`./gradlew :modules:scanner-tombos-web:jar`,
-o arquivo sai em `build/libs/`) e copiar manualmente para `[LIFERAY_HOME]/deploy` do servidor.
+1. Baixa automaticamente o `org.osgi.core-6.0.0.jar` (API padrão do OSGi, ~200KB, do Maven
+   Central) na própria pasta, se ainda não existir.
+2. Compila `ScannerTombosActivator.java`.
+3. Empacota tudo (classe compilada + pasta `static/`) em `scanner-tombos-web-1.0.0.jar`, na
+   mesma pasta.
 
-## 3. Conferir se subiu
+Se tudo der certo, você vê `Pronto: ...scanner-tombos-web-1.0.0.jar` no final.
 
-No **Gogo Shell** (Server Administration > interface web, ou telnet na porta configurada) ou
-no **Control Panel > Apps > App Manager**, procure por "TRT - Scanner de Tombos" — deve
-aparecer como **Active**.
+## 2. Instalar pelo navegador (sem precisar de acesso ao servidor)
 
-Depois acesse:
+1. Entre no portal Liferay com seu usuário administrador.
+2. Vá em **Painel de Controle > Apps > Gerenciador de Aplicativos** (App Manager).
+3. Clique no botão de opções (ícone "⋮" ou "Upload", dependendo da versão) e escolha
+   **Upload**.
+4. Selecione o arquivo `scanner-tombos-web-1.0.0.jar` gerado no passo anterior e confirme
+   **Instalar**.
+5. Confira na lista de apps que "TRT - Scanner de Tombos (Recursos Estaticos)" aparece como
+   **Ativo/Active**. Se aparecer como inativo ou com erro, veja a seção de problemas comuns
+   abaixo.
+
+## 3. Acessar o app
 
 ```
 https://<seu-portal>/scanner-tombos/index.html
 ```
 
-(É necessário o `index.html` explícito na URL — o whiteboard de recursos estáticos não faz
-resolução automática de "index" numa pasta.)
+(Precisa do `index.html` explícito na URL — o recurso estático não resolve "index" de pasta
+automaticamente.) Use exatamente essa URL no link do portal.
 
-## 4. Colocar o link no portal
+## Atualizando depois de mudar o app
 
-Use exatamente essa URL (`.../scanner-tombos/index.html`) no link do portal. Como o app já
-usa caminhos relativos internamente, funciona em qualquer path — não precisa mudar nada no
-`manifest.webmanifest` nem no `service-worker.js`.
+1. Copie os arquivos atualizados para dentro de `static/`.
+2. Abra o `MANIFEST.MF` e aumente o `Bundle-Version` (ex: `1.0.0` → `1.0.1`) — isso evita
+   conflito com a versão já instalada.
+3. Rode `build.bat` de novo.
+4. Volte no Gerenciador de Aplicativos e faça **Upload** do novo `.jar` — ele substitui a
+   versão anterior automaticamente.
+
+## Problemas comuns
+
+- **"javac não é reconhecido"**: falta um JDK instalado ou ele não está no PATH do Windows.
+- **App aparece como "Installed" mas não "Active"**: normalmente é erro de resolução de
+  pacote. Confira nos logs do Liferay (`[LIFERAY_HOME]/logs`) ou em **Painel de Controle >
+  Configuração > Logs de Log4j** por mensagens citando `com.trt.scannertombos.web`.
+- **404 ao acessar `/scanner-tombos/index.html`**: confirme que o app está "Active" no
+  Gerenciador de Aplicativos e que não existe outro módulo já registrando o mesmo padrão de
+  URL.
