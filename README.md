@@ -39,6 +39,11 @@ O app precisa ser servido via **HTTPS** para a câmera funcionar no celular (exc
 Outras opções que também funcionam: Netlify, Vercel, Firebase Hosting, ou qualquer
 servidor web da sua organização com HTTPS.
 
+**Hospedar dentro do portal Liferay do tribunal**: veja
+[`liferay-module/scanner-tombos-web`](liferay-module/scanner-tombos-web/README.md) — um
+módulo OSGi pronto para servir estes mesmos arquivos em `/scanner-tombos/*` direto pelo
+Liferay 7.3.7, sem depender de hospedagem externa.
+
 Posso ajudar a configurar o GitHub Pages (ou outra hospedagem) se você quiser — é só
 pedir.
 
