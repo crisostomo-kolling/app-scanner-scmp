@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Scanner de Tombos</title>
+<meta name="theme-color" content="#0f172a">
+<meta name="description" content="Scanner de código de barras de tombos com envio para Google Sheets">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon.svg">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="app">
+
+  <header class="topbar">
+    <div class="topbar-brand">
+      <img src="icons/icon.svg" alt="" class="topbar-logo">
+      <div>
+        <h1>Scanner de Tombos</h1>
+        <p id="sheetStatusText" class="topbar-sub">Nenhuma planilha vinculada</p>
+      </div>
+    </div>
+    <span id="connDot" class="conn-dot" title="Status de conexão"></span>
+  </header>
+
+  <main class="content">
+
+    <section class="card" id="sheetCard">
+      <div class="card-row">
+        <div class="card-icon sheet-icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M5 3h9l5 5v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.6"/><path d="M14 3v5h5" stroke="currentColor" stroke-width="1.6"/><path d="M8 13h8M8 17h8M8 9h3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </div>
+        <div class="card-text">
+          <h2>Planilha</h2>
+          <p id="sheetDetail" class="muted">Vincule a planilha do Google Sheets para começar</p>
+        </div>
+      </div>
+      <div class="card-actions">
+        <button id="btnLinkSheet" class="btn btn-primary">Vincular Planilha</button>
+        <button id="btnUnlinkSheet" class="btn btn-ghost hidden">Remover vínculo</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-row">
+        <div class="card-icon device-icon">
+          <svg viewBox="0 0 24 24" fill="none"><rect x="7" y="2" width="10" height="20" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M11 19h2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </div>
+        <div class="card-text">
+          <h2>Identificação do coletor</h2>
+          <p class="muted">Nome usado para identificar este celular na planilha</p>
+        </div>
+      </div>
+      <div class="device-input-row">
+        <input id="deviceLabel" type="text" maxlength="40" placeholder="Ex: Coletor 1 - Almoxarifado">
+        <button id="btnSaveDevice" class="btn btn-small">Salvar</button>
+      </div>
+    </section>
+
+    <section class="scan-section">
+      <button id="btnScan" class="btn-scan" disabled>
+        <svg viewBox="0 0 24 24" fill="none" class="scan-icon"><path d="M4 8V5a1 1 0 0 1 1-1h3M20 8V5a1 1 0 0 1-1-1h-3M4 16v3a1 1 0 0 0 1 1h3M20 16v3a1 1 0 0 1-1 1h-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M4 12h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <span>Iniciar Scaneamento</span>
+      </button>
+      <p id="scanHint" class="scan-hint">Vincule uma planilha para habilitar o scanner</p>
+    </section>
+
+    <section class="history">
+      <div class="history-header">
+        <h2>Últimas leituras</h2>
+        <span id="pendingBadge" class="pending-badge hidden">0 pendente(s)</span>
+      </div>
+      <ul id="historyList" class="history-list">
+        <li class="history-empty">Nenhuma leitura ainda</li>
+      </ul>
+    </section>
+
+  </main>
+</div>
+
+<div id="scanOverlay" class="scan-overlay hidden">
+  <div class="scan-overlay-top">
+    <button id="btnCloseScan" class="btn-icon" aria-label="Fechar">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+    <span id="scanCount" class="scan-count">0 lidos nesta sessão</span>
+  </div>
+  <video id="scanVideo" autoplay playsinline muted></video>
+  <div class="scan-frame"></div>
+  <div id="scanFeedback" class="scan-feedback"></div>
+</div>
+
+<div id="modalOverlay" class="modal-overlay hidden">
+  <div class="modal">
+    <h2>Vincular Planilha</h2>
+    <p class="muted">Cole abaixo a URL do Google Apps Script (Web App) publicada para sua planilha.</p>
+    <input id="sheetUrlInput" type="url" placeholder="https://script.google.com/macros/s/.../exec" autocomplete="off">
+    <p id="modalError" class="modal-error hidden"></p>
+    <div class="modal-actions">
+      <button id="btnCancelLink" class="btn btn-ghost">Cancelar</button>
+      <button id="btnConfirmLink" class="btn btn-primary">Validar e Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
