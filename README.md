@@ -1,7 +1,7 @@
 # Scanner de Tombos
 
 App web (PWA) para ler códigos de barras de tombos com o celular e enviar cada leitura
-para uma planilha do Google Sheets (DATA_HORA, TOMBO, DISPOSITIVO).
+para uma planilha do Google Sheets (DATA_HORA, TOMBO, DISPOSITIVO, USUARIO).
 
 ## 1. Configurar o Google Sheets (backend)
 
@@ -23,7 +23,9 @@ Sempre que você editar o `Code.gs`, é preciso criar uma **nova implantação**
 implantações > editar > nova versão) para que as mudanças valham.
 
 O script cria automaticamente uma aba chamada `Scans` na planilha, com o cabeçalho
-`DATA_HORA | TOMBO | DISPOSITIVO`.
+`DATA_HORA | TOMBO | DISPOSITIVO | USUARIO`. Se você já tinha uma planilha em uso antes da
+coluna `USUARIO` existir, não precisa fazer nada manualmente — o script completa o cabeçalho
+sozinho na primeira leitura enviada após atualizar o `Code.gs`.
 
 ## 2. Hospedar o app (obrigatório para instalar no celular)
 
@@ -65,6 +67,41 @@ pedir.
    aparece na lista "Últimas leituras".
 4. Sem internet, as leituras ficam marcadas como "Pendente" e são reenviadas
    automaticamente assim que a conexão voltar.
+
+## 5. Exigir login e identificar o usuário (Liferay)
+
+O app em si (`/o/scanner-tombos/index.html`, veja o [módulo Liferay](liferay-module/scanner-tombos-web/README.md))
+continua público — ele só passa a exigir login se for acessado através de uma **página
+privada do Liferay** que injete o nome do usuário logado na URL, via parâmetro `?usuario=`.
+Sem esse parâmetro, o app mostra "Usuário não identificado" no topo e o botão "Iniciar
+Scaneamento" fica clicável mas mostra um aviso em vez de abrir a câmera.
+
+Para montar isso no Liferay:
+
+1. No site desejado, vá em **Páginas do Site > Páginas Privadas** (essas já exigem login
+   por padrão) e adicione uma página nova, ex: "Scanner de Tombos".
+2. Edite a página e adicione o widget **Conteúdo Web** (Web Content Display).
+3. Crie um novo artigo de Conteúdo Web, mude para o modo de edição em HTML/origem, e cole:
+   ```html
+   <iframe
+     src="/o/scanner-tombos/index.html?usuario=${themeDisplay.getUser().getScreenName()}"
+     style="width:100%;min-height:100vh;border:0;display:block;"
+     allow="camera">
+   </iframe>
+   ```
+4. Publique o artigo e a página.
+5. Use o link **dessa página privada** (não o link direto `/o/scanner-tombos/...`) como o
+   link que vai no portal para os usuários.
+
+*(Observação: os nomes exatos dos menus podem variar um pouco conforme a versão/idioma do
+Liferay — se algo não bater com o que você vê na tela, me manda o que aparece que eu ajusto
+o passo a passo.)*
+
+Isso é uma exigência "branda": quem tiver o link direto do arquivo estático ainda consegue
+abrir sem logar (só não vai ter usuário identificado, então o botão de escanear vai mostrar
+o aviso de erro em vez de funcionar). Não bloqueia no nível do servidor — para isso seria
+necessário reescrever o módulo com autenticação real do lado do Java, uma opção mais
+trabalhosa que ficou de fora por ora.
 
 ## Estrutura do projeto
 

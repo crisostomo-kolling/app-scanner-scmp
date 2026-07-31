@@ -93,6 +93,13 @@ body {
   color: #a8b4d0;
 }
 
+.user-status.user-ok {
+  color: #86efac;
+}
+.user-status.user-missing {
+  color: #fca5a5;
+}
+
 .conn-dot {
   width: 10px;
   height: 10px;

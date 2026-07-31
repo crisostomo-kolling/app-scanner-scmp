@@ -24,6 +24,7 @@ function doPost(e) {
     var data = JSON.parse(e.postData.contents);
     var tombo = (data.tombo || '').toString().trim();
     var dispositivo = (data.dispositivo || 'Desconhecido').toString().trim();
+    var usuario = (data.usuario || 'Desconhecido').toString().trim();
     var dataHora = data.dataHora ? new Date(data.dataHora) : new Date();
 
     if (!tombo) {
@@ -32,7 +33,7 @@ function doPost(e) {
 
     var sheet = getSheet();
     ensureHeader(sheet);
-    sheet.appendRow([dataHora, tombo, dispositivo]);
+    sheet.appendRow([dataHora, tombo, dispositivo, usuario]);
 
     return jsonResponse({ status: 'ok' });
   } catch (err) {
@@ -50,10 +51,21 @@ function getSheet() {
 }
 
 function ensureHeader(sheet) {
+  var headers = ['DATA_HORA', 'TOMBO', 'DISPOSITIVO', 'USUARIO'];
+
   if (sheet.getLastRow() === 0) {
-    sheet.appendRow(['DATA_HORA', 'TOMBO', 'DISPOSITIVO']);
-    sheet.getRange(1, 1, 1, 3).setFontWeight('bold');
+    sheet.appendRow(headers);
+    sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold');
     sheet.setFrozenRows(1);
+    return;
+  }
+
+  // Planilhas criadas antes da coluna USUARIO existir: completa o cabecalho sem mexer nos dados.
+  var lastColumn = sheet.getLastColumn();
+  if (lastColumn < headers.length) {
+    var missing = headers.slice(lastColumn);
+    sheet.getRange(1, lastColumn + 1, 1, missing.length).setValues([missing]);
+    sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold');
   }
 }
 

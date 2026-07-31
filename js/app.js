@@ -14,6 +14,7 @@
 
   const els = {
     sheetStatusText: el('sheetStatusText'),
+    userStatusText: el('userStatusText'),
     sheetDetail: el('sheetDetail'),
     btnLinkSheet: el('btnLinkSheet'),
     btnUnlinkSheet: el('btnUnlinkSheet'),
@@ -45,6 +46,7 @@
     deviceLabel: localStorage.getItem(LS_DEVICE_LABEL) || '',
     queue: loadJSON(LS_QUEUE, []),
     history: loadJSON(LS_HISTORY, []),
+    usuario: new URLSearchParams(window.location.search).get('usuario') || '',
   };
 
   let stream = null;
@@ -84,6 +86,18 @@
 
   function deviceIdentifier() {
     return state.deviceLabel || state.deviceId;
+  }
+
+  function refreshUserUI() {
+    if (state.usuario) {
+      els.userStatusText.textContent = `Usuário: ${state.usuario}`;
+      els.userStatusText.classList.add('user-ok');
+      els.userStatusText.classList.remove('user-missing');
+    } else {
+      els.userStatusText.textContent = 'Usuário não identificado';
+      els.userStatusText.classList.add('user-missing');
+      els.userStatusText.classList.remove('user-ok');
+    }
   }
 
   // ---------- UI: sheet link status ----------
@@ -214,7 +228,7 @@
   async function sendTombo(tombo) {
     const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const dataHora = new Date().toISOString();
-    const payload = { id, tombo, dataHora, dispositivo: deviceIdentifier() };
+    const payload = { id, tombo, dataHora, dispositivo: deviceIdentifier(), usuario: state.usuario };
 
     addHistoryEntry({ id, tombo, dataHora, status: 'pending' });
     sessionCount += 1;
@@ -271,6 +285,10 @@
 
   // ---------- Barcode scanning ----------
   async function openScanner() {
+    if (!state.usuario) {
+      showToast('Não foi possível identificar seu usuário. Abra este app pelo link do portal (logado) para poder escanear.');
+      return;
+    }
     if (!('BarcodeDetector' in window)) {
       showToast('Este navegador não suporta leitura de código de barras nativa.');
       return;
@@ -351,6 +369,7 @@
   function init() {
     ensureDeviceId();
     refreshSheetUI();
+    refreshUserUI();
     renderHistory();
     updatePendingBadge();
     updateConnDot();
