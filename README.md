@@ -85,26 +85,49 @@ Para montar isso no Liferay:
    Cole:
    ```html
    <script>
-     function abrirScanner() {
-       if (window.Liferay && Liferay.ThemeDisplay && Liferay.ThemeDisplay.isSignedIn()) {
-         var nome = Liferay.ThemeDisplay.getUserName();
-         window.location.replace('/o/scanner-tombos/index.html?usuario=' + encodeURIComponent(nome));
-       } else {
-         document.body.innerHTML = '<p>Não foi possível identificar seu usuário. Faça login novamente.</p>';
-       }
+     function abrirScanner(nome) {
+       var segundos = 3;
+       var contadorEl = document.getElementById('contador');
+       var intervalo = setInterval(function () {
+         segundos -= 1;
+         if (contadorEl) contadorEl.textContent = segundos;
+         if (segundos <= 0) {
+           clearInterval(intervalo);
+           window.location.replace('/o/scanner-tombos/index.html?usuario=' + encodeURIComponent(nome));
+         }
+       }, 1000);
      }
+
+     function iniciar() {
+       if (!(window.Liferay && Liferay.ThemeDisplay && Liferay.ThemeDisplay.isSignedIn())) {
+         document.body.innerHTML = '<p>Não foi possível identificar seu usuário. Faça login novamente.</p>';
+         return;
+       }
+       var userId = Liferay.ThemeDisplay.getUserId();
+       Liferay.Service.Portal.User.getUserById({ userId: userId }, function (user) {
+         var nome = (user && user.screenName) ? user.screenName : Liferay.ThemeDisplay.getUserName();
+         abrirScanner(nome);
+       });
+     }
+
      if (document.readyState === 'loading') {
-       document.addEventListener('DOMContentLoaded', abrirScanner);
+       document.addEventListener('DOMContentLoaded', iniciar);
      } else {
-       abrirScanner();
+       iniciar();
      }
    </script>
-   <p>Abrindo o Scanner de Tombos...</p>
+   <p>Abrindo o Scanner de Tombos em <span id="contador">3</span> segundos...</p>
    ```
-   Isso usa `Liferay.ThemeDisplay`, um objeto JavaScript que o próprio tema do Liferay
-   disponibiliza em toda página para o usuário logado — pega o nome direto no navegador
-   (sem precisar de Freemarker/Estrutura/Template) e redireciona a aba inteira para o app.
-   O app abre em tela cheia, sem o menu/tema do Liferay em volta, já com o usuário correto.
+   Isso usa `Liferay.ThemeDisplay` (disponível em toda página para o usuário logado) e
+   `Liferay.Service.Portal.User.getUserById` (chamada autenticada que busca o `screenName` —
+   o login do usuário, não o nome completo) para identificar quem está acessando, mostra uma
+   contagem regressiva de 3 segundos e então redireciona a aba inteira para o app. O app abre
+   em tela cheia, sem o menu/tema do Liferay em volta, já com o usuário correto.
+
+   *(Se por algum motivo a busca do `screenName` falhar — por exemplo, alguma política de
+   acesso a serviços bloqueando a chamada —, o código cai de volta para
+   `Liferay.ThemeDisplay.getUserName()`, que mostra o nome completo em vez do login. Se isso
+   acontecer, me avisa que investigamos.)*
 
    *(Tentativas anteriores com `${themeDisplay.getUser().getScreenName()}` dentro de um
    Conteúdo Web básico não funcionam: esse placeholder só é processado quando o artigo usa
