@@ -1,6 +1,8 @@
 (() => {
   'use strict';
 
+  const APP_VERSION = '1.3.0';
+
   const LS_SHEET_URL = 'scanner.sheetUrl';
   const LS_SHEET_NAME = 'scanner.sheetName';
   const LS_DEVICE_ID = 'scanner.deviceId';
@@ -37,6 +39,7 @@
     btnConfirmLink: el('btnConfirmLink'),
     toast: el('toast'),
     connDot: el('connDot'),
+    appVersion: el('appVersion'),
   };
 
   let state = {
@@ -367,6 +370,7 @@
 
   // ---------- Wire up events ----------
   function init() {
+    els.appVersion.textContent = `v${APP_VERSION}`;
     ensureDeviceId();
     refreshSheetUI();
     refreshUserUI();

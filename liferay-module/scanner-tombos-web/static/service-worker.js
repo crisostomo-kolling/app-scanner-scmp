@@ -1,4 +1,4 @@
-const CACHE_NAME = 'scanner-tombos-v1';
+const CACHE_NAME = 'scanner-tombos-v2';
 const APP_SHELL = [
   './',
   './index.html',
@@ -34,16 +34,15 @@ self.addEventListener('fetch', (event) => {
 
   if (event.request.method !== 'GET') return;
 
+  // Network-first for the app shell: always prefer the latest deployed files when
+  // online, and only fall back to the cached copy when there is no connectivity.
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      if (cached) return cached;
-      return fetch(event.request).then((response) => {
-        if (response.ok && url.origin === self.location.origin) {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
-        }
-        return response;
-      }).catch(() => cached);
-    })
+    fetch(event.request).then((response) => {
+      if (response.ok && url.origin === self.location.origin) {
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+      }
+      return response;
+    }).catch(() => caches.match(event.request))
   );
 });

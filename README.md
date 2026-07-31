@@ -68,6 +68,18 @@ pedir.
 4. Sem internet, as leituras ficam marcadas como "Pendente" e são reenviadas
    automaticamente assim que a conexão voltar.
 
+O número da versão do app (`vX.X.X`) aparece pequeno, no final da tela — útil para conferir
+se um celular já está com a versão mais recente depois de uma atualização. Ele é definido em
+`js/app.js` (constante `APP_VERSION`) e é atualizado junto com o `Bundle-Version` do
+[módulo Liferay](liferay-module/scanner-tombos-web/README.md), então os dois números batem.
+
+**Atualizações e cache**: o app usa um Service Worker para funcionar instalado/offline. Ele
+busca sempre a versão mais nova do servidor quando há internet (só usa a cópia em cache como
+reserva, sem internet). Ainda assim, o navegador só troca o Service Worker por uma versão
+nova depois de reabrir o app — se um celular parecer estar preso numa versão antiga mesmo
+após reenviar os arquivos, feche o app completamente (não só minimizar) e abra de novo; em
+último caso, limpe os dados do site nas configurações do Chrome.
+
 ## 5. Exigir login e identificar o usuário (Liferay)
 
 O app em si (`/o/scanner-tombos/index.html`, veja o [módulo Liferay](liferay-module/scanner-tombos-web/README.md))
