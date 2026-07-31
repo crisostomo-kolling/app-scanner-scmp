@@ -61,12 +61,12 @@ rodando `build.bat` no cmd). O script:
 1. Baixa automaticamente o `org.osgi.core-6.0.0.jar` (API padrão do OSGi, ~200KB, do Maven
    Central) na própria pasta, se ainda não existir.
 2. Compila `ScannerTombosActivator.java`.
-3. Empacota tudo (classe compilada + pasta `static/`) em `scanner-tombos-web.jar`, na
-   mesma pasta.
+3. Empacota tudo (classe compilada + pasta `static/`) em `scanner-tombos-web-X.X.X.jar` (o
+   número vem direto do `Bundle-Version` do `MANIFEST.MF`, então o nome do arquivo nunca
+   fica dessincronizado da versão real de dentro do jar), na mesma pasta.
 
-Se tudo der certo, você vê `Pronto: ...scanner-tombos-web.jar (Bundle-Version: X.X.X)` no
-final — confira que a versão mostrada é a que você esperava (veja "Atualizando depois de
-mudar o app" abaixo).
+Se tudo der certo, você vê `Pronto: ...scanner-tombos-web-X.X.X.jar` no final — confira que
+o número é o que você esperava (veja "Atualizando depois de mudar o app" abaixo).
 
 ## 2. Instalar pelo navegador (sem precisar de acesso ao servidor)
 
@@ -74,7 +74,7 @@ mudar o app" abaixo).
 2. Vá em **Painel de Controle > Apps > Gerenciador de Aplicativos** (App Manager).
 3. Clique no botão de opções (ícone "⋮" ou "Upload", dependendo da versão) e escolha
    **Upload**.
-4. Selecione o arquivo `scanner-tombos-web.jar` gerado no passo anterior e confirme
+4. Selecione o arquivo `scanner-tombos-web-X.X.X.jar` gerado no passo anterior e confirme
    **Instalar**.
 5. Confira na lista de apps que "TRT - Scanner de Tombos (Recursos Estaticos)" aparece como
    **Ativo/Active**. Se aparecer como inativo ou com erro, veja a seção de problemas comuns
