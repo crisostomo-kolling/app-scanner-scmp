@@ -1,4 +1,4 @@
-package com.trt.scannertombos.web.internal;
+package br.jus.trt24.scmp.scannertombos.web.internal;
 
 import java.util.Hashtable;
 
@@ -9,7 +9,7 @@ import org.osgi.framework.ServiceRegistration;
 /**
  * Registra a pasta static/ (empacotada dentro deste jar, veja build.bat)
  * como recurso HTTP estatico via OSGi HTTP Whiteboard, acessivel em
- * /scanner-tombos/*. Nao ha nenhuma logica de negocio aqui.
+ * /o/scanner-tombos/*. Nao ha nenhuma logica de negocio aqui.
  */
 public class ScannerTombosActivator implements BundleActivator {
 

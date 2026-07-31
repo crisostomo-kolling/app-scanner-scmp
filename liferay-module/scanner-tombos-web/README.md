@@ -101,14 +101,18 @@ o link que deve realmente ser divulgado.
    antes de subir.
 3. Rode `build.bat` de novo.
 4. Volte no Gerenciador de Aplicativos e faça **Upload** do novo `.jar` — ele substitui a
-   versão anterior automaticamente (não precisa remover/desativar a antiga antes).
+   versão anterior automaticamente (não precisa remover/desativar a antiga antes), **desde
+   que o `Bundle-SymbolicName` não tenha mudado**. Se o `Bundle-SymbolicName` mudar (por
+   exemplo, numa renomeação de pacote), o Liferay trata como um módulo totalmente novo — o
+   antigo fica instalado em paralelo e precisa ser removido manualmente no Gerenciador de
+   Aplicativos.
 
 ## Problemas comuns
 
 - **"javac não é reconhecido"**: falta um JDK instalado ou ele não está no PATH do Windows.
 - **App aparece como "Installed" mas não "Active"**: normalmente é erro de resolução de
   pacote. Confira nos logs do Liferay (`[LIFERAY_HOME]/logs`) ou em **Painel de Controle >
-  Configuração > Logs de Log4j** por mensagens citando `com.trt.scannertombos.web`.
+  Configuração > Logs de Log4j** por mensagens citando `br.jus.trt24.scmp.scannertombos.web`.
 - **404 ao acessar**: confirme que usou o prefixo `/o/` (`/o/scanner-tombos/index.html`, não
   `/scanner-tombos/index.html`), que o app está "Active" no Gerenciador de Aplicativos, e que
   não existe outro módulo já registrando o mesmo padrão de URL.
