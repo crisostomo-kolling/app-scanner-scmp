@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const APP_VERSION = '1.6.0';
+  const APP_VERSION = '1.7.0';
 
   const LS_SHEET_URL = 'scanner.sheetUrl';
   const LS_SHEET_NAME = 'scanner.sheetName';
@@ -425,6 +425,16 @@
 
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('service-worker.js').catch(() => {});
+
+      // Quando uma versao nova do Service Worker assume o controle da pagina,
+      // recarrega uma vez sozinho -- sem isso o usuario ve a versao antiga ate
+      // atualizar manualmente.
+      let reloadingForNewSW = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (reloadingForNewSW) return;
+        reloadingForNewSW = true;
+        window.location.reload();
+      });
     }
   }
 

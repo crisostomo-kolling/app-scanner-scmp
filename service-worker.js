@@ -1,4 +1,4 @@
-const CACHE_NAME = 'scanner-tombos-v2';
+const CACHE_NAME = 'scanner-tombos-v3';
 const APP_SHELL = [
   './',
   './index.html',
