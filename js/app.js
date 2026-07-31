@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const APP_VERSION = '1.3.0';
+  const APP_VERSION = '1.4.0';
 
   const LS_SHEET_URL = 'scanner.sheetUrl';
   const LS_SHEET_NAME = 'scanner.sheetName';
@@ -9,6 +9,7 @@
   const LS_DEVICE_LABEL = 'scanner.deviceLabel';
   const LS_QUEUE = 'scanner.queue';
   const LS_HISTORY = 'scanner.history';
+  const LS_USUARIO_MANUAL = 'scanner.usuarioManual';
   const DUPLICATE_WINDOW_MS = 2500;
   const MAX_HISTORY = 30;
 
@@ -17,6 +18,9 @@
   const els = {
     sheetStatusText: el('sheetStatusText'),
     userStatusText: el('userStatusText'),
+    userCard: el('userCard'),
+    userInput: el('userInput'),
+    btnSaveUser: el('btnSaveUser'),
     sheetDetail: el('sheetDetail'),
     btnLinkSheet: el('btnLinkSheet'),
     btnUnlinkSheet: el('btnUnlinkSheet'),
@@ -49,7 +53,8 @@
     deviceLabel: localStorage.getItem(LS_DEVICE_LABEL) || '',
     queue: loadJSON(LS_QUEUE, []),
     history: loadJSON(LS_HISTORY, []),
-    usuario: new URLSearchParams(window.location.search).get('usuario') || '',
+    usuario: new URLSearchParams(window.location.search).get('usuario') || localStorage.getItem(LS_USUARIO_MANUAL) || '',
+    usuarioFromUrl: !!new URLSearchParams(window.location.search).get('usuario'),
   };
 
   let stream = null;
@@ -100,6 +105,13 @@
       els.userStatusText.textContent = 'Usuário não identificado';
       els.userStatusText.classList.add('user-missing');
       els.userStatusText.classList.remove('user-ok');
+    }
+
+    // Só mostra o campo manual quando o usuário não veio automaticamente pela URL
+    // (fluxo do Liferay) — evita confundir quem já está identificado pelo login.
+    els.userCard.classList.toggle('hidden', state.usuarioFromUrl);
+    if (!state.usuarioFromUrl) {
+      els.userInput.value = state.usuario;
     }
   }
 
@@ -389,6 +401,15 @@
       state.deviceLabel = label;
       localStorage.setItem(LS_DEVICE_LABEL, label);
       showToast('Identificação do coletor salva');
+    });
+
+    els.btnSaveUser.addEventListener('click', () => {
+      const usuario = els.userInput.value.trim();
+      if (!usuario) return;
+      state.usuario = usuario;
+      localStorage.setItem(LS_USUARIO_MANUAL, usuario);
+      refreshUserUI();
+      showToast('Usuário salvo');
     });
 
     els.btnScan.addEventListener('click', openScanner);

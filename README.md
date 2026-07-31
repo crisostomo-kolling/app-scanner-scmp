@@ -62,10 +62,13 @@ pedir.
    a conexão antes de salvar.
 2. Ajuste a **Identificação do coletor** (nome deste celular) se quiser algo mais
    descritivo que o padrão gerado automaticamente.
-3. Toque em **Iniciar Scaneamento** (só habilita depois de vincular a planilha), aponte a
+3. Se o app não estiver rodando atrás do fluxo de login do Liferay (seção 5), aparece
+   também um card **Identificação do usuário** — digite seu usuário manualmente ali. Sem
+   isso preenchido, o botão de escanear mostra um aviso em vez de abrir a câmera.
+4. Toque em **Iniciar Scaneamento** (só habilita depois de vincular a planilha), aponte a
    câmera para o código de barras do tombo. Cada leitura é enviada automaticamente e
    aparece na lista "Últimas leituras".
-4. Sem internet, as leituras ficam marcadas como "Pendente" e são reenviadas
+5. Sem internet, as leituras ficam marcadas como "Pendente" e são reenviadas
    automaticamente assim que a conexão voltar.
 
 O número da versão do app (`vX.X.X`) aparece pequeno, no final da tela — útil para conferir
@@ -85,8 +88,10 @@ após reenviar os arquivos, feche o app completamente (não só minimizar) e abr
 O app em si (`/o/scanner-tombos/index.html`, veja o [módulo Liferay](liferay-module/scanner-tombos-web/README.md))
 continua público — ele só passa a exigir login se for acessado através de uma **página
 privada do Liferay** que injete o nome do usuário logado na URL, via parâmetro `?usuario=`.
-Sem esse parâmetro, o app mostra "Usuário não identificado" no topo e o botão "Iniciar
-Scaneamento" fica clicável mas mostra um aviso em vez de abrir a câmera.
+Sem esse parâmetro (por exemplo, ao acessar direto pelo GitHub Pages ou outra hospedagem sem
+Liferay), o app mostra um card **Identificação do usuário** para preencher manualmente — veja
+a seção 4. Sem usuário identificado (de um jeito ou de outro), o botão "Iniciar Scaneamento"
+fica clicável mas mostra um aviso em vez de abrir a câmera.
 
 Para montar isso no Liferay:
 
