@@ -85,38 +85,18 @@ Para montar isso no Liferay:
    Cole:
    ```html
    <script>
-     var nomeUsuario = null;
-
-     function atualizarLink() {
-       var link = document.getElementById('linkAbrir');
-       if (!link || !nomeUsuario) return;
-       link.href = '/o/scanner-tombos/index.html?usuario=' + encodeURIComponent(nomeUsuario);
-       link.textContent = 'Abrir o Scanner de Tombos (usuário: ' + nomeUsuario + ')';
-     }
-
      function iniciar() {
        if (!(window.Liferay && Liferay.ThemeDisplay && Liferay.ThemeDisplay.isSignedIn())) {
          document.body.innerHTML = '<p>Não foi possível identificar seu usuário. Faça login novamente.</p>';
          return;
        }
 
-       // Mostra o link de imediato com o nome completo (sempre disponível).
-       nomeUsuario = Liferay.ThemeDisplay.getUserName();
-       atualizarLink();
+       var email = Liferay.ThemeDisplay.getUserEmailAddress() || '';
+       var nome = email.indexOf('@') > -1 ? email.split('@')[0] : Liferay.ThemeDisplay.getUserName();
 
-       // Em paralelo, tenta trocar pelo login (screenName); se conseguir a tempo do clique,
-       // atualiza o link sozinho. Se falhar/demorar, o link acima continua funcionando.
-       try {
-         var userId = Liferay.ThemeDisplay.getUserId();
-         Liferay.Service.Portal.User.getUserById({ userId: userId }, function (user) {
-           if (user && user.screenName) {
-             nomeUsuario = user.screenName;
-             atualizarLink();
-           }
-         });
-       } catch (e) {
-         // mantem o nome completo ja exibido
-       }
+       var link = document.getElementById('linkAbrir');
+       link.href = '/o/scanner-tombos/index.html?usuario=' + encodeURIComponent(nome);
+       link.textContent = 'Abrir o Scanner de Tombos (usuário: ' + nome + ')';
      }
 
      if (document.readyState === 'loading') {
@@ -133,21 +113,17 @@ Para montar isso no Liferay:
      </a>
    </p>
    ```
-   Isso usa `Liferay.ThemeDisplay` (disponível em toda página para o usuário logado) para
-   mostrar de imediato um link clicável com o nome completo, e tenta em paralelo trocar pelo
-   login (`screenName`, via `Liferay.Service.Portal.User.getUserById`) antes de você clicar —
-   sem depender de temporizador nem de redirecionamento automático. Ao tocar no link, o app
-   abre em tela cheia, sem o menu/tema do Liferay em volta, com o usuário já identificado.
+   Isso usa `Liferay.ThemeDisplay.getUserEmailAddress()` (confirmado disponível nesta
+   instância, ao contrário de `screenName`/`Liferay.Service.Portal.User`, que não existem
+   aqui) e pega a parte antes do `@` como login — no e-mail padrão do tribunal
+   (`usuario@trt24.jus.br`) isso já é exatamente o nome de usuário. Sem chamada nenhuma ao
+   servidor, então não depende de nenhuma API que possa estar bloqueada ou ausente.
 
-   *(Se o link continuar mostrando o nome completo em vez do login mesmo depois de alguns
-   segundos, é sinal de que a busca do `screenName` está sendo bloqueada — possivelmente
-   alguma Política de Acesso a Serviços do Liferay. Nesse caso funciona do mesmo jeito, só
-   identifica pelo nome completo; me avisa se quiser investigar o bloqueio.)*
-
-   *(Tentativas anteriores com `${themeDisplay.getUser().getScreenName()}` dentro de um
-   Conteúdo Web básico não funcionam: esse placeholder só é processado quando o artigo usa
-   uma Estrutura + Template Freemarker próprios, o que é bem mais trabalhoso de configurar.
-   A abordagem acima evita essa complicação inteira.)*
+   *(Histórico: tentamos primeiro `${themeDisplay.getUser().getScreenName()}` num Conteúdo
+   Web — só funciona com Estrutura+Template Freemarker próprios. Depois tentamos
+   `Liferay.Service.Portal.User.getUserById` — essa API não existe nesta instância
+   (`Liferay.Service.Portal` é `undefined`). Descobrimos isso inspecionando todos os métodos
+   de `Liferay.ThemeDisplay` na prática, em vez de adivinhar pela documentação.)*
 
    *(Alternativa: se preferir manter o app dentro da página do Liferay, com o menu do portal
    visível, troque o `window.location.replace(...)` por um `<iframe src="...">` apontando
