@@ -80,27 +80,42 @@ Para montar isso no Liferay:
 
 1. No site desejado, vá em **Páginas do Site > Páginas Privadas** (essas já exigem login
    por padrão) e adicione uma página nova, ex: "Scanner de Tombos".
-2. Edite a página e adicione o widget **Conteúdo Web** (Web Content Display) — **importante:
-   tem que ser esse widget especificamente**, e não um widget genérico de "HTML"/"Objeto
-   HTML". Só o Conteúdo Web processa os placeholders `${...}` do Liferay (Freemarker) e troca
-   pelo nome real do usuário; outros widgets de HTML cru só exibem o texto `${...}` sem
-   processar, o que quebra a identificação do usuário.
-3. Crie um novo artigo de Conteúdo Web, mude para o modo de edição em HTML/origem, e cole:
+2. Edite a página e adicione qualquer widget que aceite colar HTML/JS cru (o widget genérico
+   de "HTML"/"Objeto HTML" funciona bem aqui — **não precisa** ser o widget "Conteúdo Web").
+   Cole:
    ```html
    <script>
-     window.location.replace("/o/scanner-tombos/index.html?usuario=${themeDisplay.getUser().getScreenName()}");
+     function abrirScanner() {
+       if (window.Liferay && Liferay.ThemeDisplay && Liferay.ThemeDisplay.isSignedIn()) {
+         var nome = Liferay.ThemeDisplay.getUserName();
+         window.location.replace('/o/scanner-tombos/index.html?usuario=' + encodeURIComponent(nome));
+       } else {
+         document.body.innerHTML = '<p>Não foi possível identificar seu usuário. Faça login novamente.</p>';
+       }
+     }
+     if (document.readyState === 'loading') {
+       document.addEventListener('DOMContentLoaded', abrirScanner);
+     } else {
+       abrirScanner();
+     }
    </script>
    <p>Abrindo o Scanner de Tombos...</p>
    ```
-   Isso redireciona a aba inteira para o app assim que a página carrega — o app abre em tela
-   cheia, sem o menu/tema do Liferay em volta, já com o usuário correto (calculado no
-   servidor antes do redirecionamento).
+   Isso usa `Liferay.ThemeDisplay`, um objeto JavaScript que o próprio tema do Liferay
+   disponibiliza em toda página para o usuário logado — pega o nome direto no navegador
+   (sem precisar de Freemarker/Estrutura/Template) e redireciona a aba inteira para o app.
+   O app abre em tela cheia, sem o menu/tema do Liferay em volta, já com o usuário correto.
+
+   *(Tentativas anteriores com `${themeDisplay.getUser().getScreenName()}` dentro de um
+   Conteúdo Web básico não funcionam: esse placeholder só é processado quando o artigo usa
+   uma Estrutura + Template Freemarker próprios, o que é bem mais trabalhoso de configurar.
+   A abordagem acima evita essa complicação inteira.)*
 
    *(Alternativa: se preferir manter o app dentro da página do Liferay, com o menu do portal
-   visível, use um `<iframe>` em vez do redirecionamento — mas para uso no celular, tela
-   cheia costuma ser melhor.)*
-4. Publique o artigo e a página.
-5. Use o link **dessa página privada** (não o link direto `/o/scanner-tombos/...`) como o
+   visível, troque o `window.location.replace(...)` por um `<iframe src="...">` apontando
+   pra mesma URL — mas para uso no celular, tela cheia costuma ser melhor.)*
+3. Publique o widget/artigo e a página.
+4. Use o link **dessa página privada** (não o link direto `/o/scanner-tombos/...`) como o
    link que vai no portal para os usuários.
 
 *(Observação: os nomes exatos dos menus podem variar um pouco conforme a versão/idioma do
