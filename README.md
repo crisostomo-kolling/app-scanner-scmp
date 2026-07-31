@@ -80,15 +80,25 @@ Para montar isso no Liferay:
 
 1. No site desejado, vá em **Páginas do Site > Páginas Privadas** (essas já exigem login
    por padrão) e adicione uma página nova, ex: "Scanner de Tombos".
-2. Edite a página e adicione o widget **Conteúdo Web** (Web Content Display).
+2. Edite a página e adicione o widget **Conteúdo Web** (Web Content Display) — **importante:
+   tem que ser esse widget especificamente**, e não um widget genérico de "HTML"/"Objeto
+   HTML". Só o Conteúdo Web processa os placeholders `${...}` do Liferay (Freemarker) e troca
+   pelo nome real do usuário; outros widgets de HTML cru só exibem o texto `${...}` sem
+   processar, o que quebra a identificação do usuário.
 3. Crie um novo artigo de Conteúdo Web, mude para o modo de edição em HTML/origem, e cole:
    ```html
-   <iframe
-     src="/o/scanner-tombos/index.html?usuario=${themeDisplay.getUser().getScreenName()}"
-     style="width:100%;min-height:100vh;border:0;display:block;"
-     allow="camera">
-   </iframe>
+   <script>
+     window.location.replace("/o/scanner-tombos/index.html?usuario=${themeDisplay.getUser().getScreenName()}");
+   </script>
+   <p>Abrindo o Scanner de Tombos...</p>
    ```
+   Isso redireciona a aba inteira para o app assim que a página carrega — o app abre em tela
+   cheia, sem o menu/tema do Liferay em volta, já com o usuário correto (calculado no
+   servidor antes do redirecionamento).
+
+   *(Alternativa: se preferir manter o app dentro da página do Liferay, com o menu do portal
+   visível, use um `<iframe>` em vez do redirecionamento — mas para uso no celular, tela
+   cheia costuma ser melhor.)*
 4. Publique o artigo e a página.
 5. Use o link **dessa página privada** (não o link direto `/o/scanner-tombos/...`) como o
    link que vai no portal para os usuários.
