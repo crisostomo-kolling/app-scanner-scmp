@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const APP_VERSION = '1.4.0';
+  const APP_VERSION = '1.5.0';
 
   const LS_SHEET_URL = 'scanner.sheetUrl';
   const LS_SHEET_NAME = 'scanner.sheetName';
@@ -373,9 +373,13 @@
     if (navigator.vibrate) navigator.vibrate(80);
     els.scanFrame.classList.add('flash');
     setTimeout(() => els.scanFrame.classList.remove('flash'), 220);
-    els.scanFeedback.textContent = `Tombo lido: ${value}`;
+
+    els.scanFeedback.innerHTML =
+      '<svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+      `<span>Tombo lido: ${escapeHtml(value)}</span>`;
+    els.scanFeedback.classList.add('visible');
     clearTimeout(handleDetected._t);
-    handleDetected._t = setTimeout(() => { els.scanFeedback.textContent = ''; }, 1600);
+    handleDetected._t = setTimeout(() => { els.scanFeedback.classList.remove('visible'); }, 2000);
 
     sendTombo(value);
   }
