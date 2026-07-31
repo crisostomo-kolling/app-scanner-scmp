@@ -2,6 +2,6 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: TRT - Scanner de Tombos (Recursos Estaticos)
 Bundle-SymbolicName: br.jus.trt24.scmp.scannertombos.web
-Bundle-Version: 1.5.0
+Bundle-Version: 1.6.0
 Bundle-Activator: br.jus.trt24.scmp.scannertombos.web.internal.ScannerTombosActivator
 Import-Package: org.osgi.framework

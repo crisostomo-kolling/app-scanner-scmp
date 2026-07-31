@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const APP_VERSION = '1.5.0';
+  const APP_VERSION = '1.6.0';
 
   const LS_SHEET_URL = 'scanner.sheetUrl';
   const LS_SHEET_NAME = 'scanner.sheetName';
