@@ -4,7 +4,9 @@ setlocal enabledelayedexpansion
 set MODULE_DIR=%~dp0
 set OSGI_JAR=%MODULE_DIR%org.osgi.core-6.0.0.jar
 set OUT_DIR=%MODULE_DIR%build
-set OUT_JAR=%MODULE_DIR%scanner-tombos-web-1.0.0.jar
+set OUT_JAR=%MODULE_DIR%scanner-tombos-web.jar
+
+for /f "tokens=2 delims=: " %%V in ('findstr /b "Bundle-Version" "%MODULE_DIR%MANIFEST.MF"') do set BUNDLE_VERSION=%%V
 
 set JAVAC_CMD=javac
 set JAR_CMD=jar
@@ -55,7 +57,8 @@ pushd "%MODULE_DIR%"
 popd
 
 echo.
-echo Pronto: %OUT_JAR%
+echo Pronto: %OUT_JAR%  (Bundle-Version: %BUNDLE_VERSION%)
 echo Agora va no Liferay em Painel de Controle ^> Apps ^> Gerenciador de Aplicativos ^> Upload, e envie esse arquivo.
+echo Se voce alterou o app desde o ultimo envio, confirme que a versao acima e MAIOR que a instalada.
 
 endlocal

@@ -1,8 +1,10 @@
 # scanner-tombos-web (módulo OSGi Liferay)
 
 Serve os arquivos do PWA [Scanner de Tombos](../../README.md) direto pelo Liferay, em
-`/scanner-tombos/*`, usando o padrão **HTTP Whiteboard** do OSGi. Testado para Liferay Portal
-CE 7.3.7 GA8.
+`/o/scanner-tombos/*`, usando o padrão **HTTP Whiteboard** do OSGi. Testado e confirmado
+funcionando em produção no Liferay Portal CE 7.3.7 GA8 (o prefixo `/o/` é exigido pelo
+Liferay para recursos registrados no contexto HTTP padrão — bare `/scanner-tombos/*` não
+funciona, dá 404).
 
 Esse módulo **não usa Gradle nem Blade CLI** — só o JDK (que já vem com `javac` e `jar`) para
 gerar um único arquivo `.jar`, que depois você instala direto pelo navegador, sem precisar de
@@ -59,10 +61,12 @@ rodando `build.bat` no cmd). O script:
 1. Baixa automaticamente o `org.osgi.core-6.0.0.jar` (API padrão do OSGi, ~200KB, do Maven
    Central) na própria pasta, se ainda não existir.
 2. Compila `ScannerTombosActivator.java`.
-3. Empacota tudo (classe compilada + pasta `static/`) em `scanner-tombos-web-1.0.0.jar`, na
+3. Empacota tudo (classe compilada + pasta `static/`) em `scanner-tombos-web.jar`, na
    mesma pasta.
 
-Se tudo der certo, você vê `Pronto: ...scanner-tombos-web-1.0.0.jar` no final.
+Se tudo der certo, você vê `Pronto: ...scanner-tombos-web.jar (Bundle-Version: X.X.X)` no
+final — confira que a versão mostrada é a que você esperava (veja "Atualizando depois de
+mudar o app" abaixo).
 
 ## 2. Instalar pelo navegador (sem precisar de acesso ao servidor)
 
@@ -70,7 +74,7 @@ Se tudo der certo, você vê `Pronto: ...scanner-tombos-web-1.0.0.jar` no final.
 2. Vá em **Painel de Controle > Apps > Gerenciador de Aplicativos** (App Manager).
 3. Clique no botão de opções (ícone "⋮" ou "Upload", dependendo da versão) e escolha
    **Upload**.
-4. Selecione o arquivo `scanner-tombos-web-1.0.0.jar` gerado no passo anterior e confirme
+4. Selecione o arquivo `scanner-tombos-web.jar` gerado no passo anterior e confirme
    **Instalar**.
 5. Confira na lista de apps que "TRT - Scanner de Tombos (Recursos Estaticos)" aparece como
    **Ativo/Active**. Se aparecer como inativo ou com erro, veja a seção de problemas comuns
@@ -79,20 +83,25 @@ Se tudo der certo, você vê `Pronto: ...scanner-tombos-web-1.0.0.jar` no final.
 ## 3. Acessar o app
 
 ```
-https://<seu-portal>/scanner-tombos/index.html
+https://<seu-portal>/o/scanner-tombos/index.html
 ```
 
 (Precisa do `index.html` explícito na URL — o recurso estático não resolve "index" de pasta
-automaticamente.) Use exatamente essa URL no link do portal.
+automaticamente. E precisa do `/o/` na frente — veja a observação no topo deste arquivo.)
+Não coloque esse link direto no portal para os usuários finais — veja a seção "Exigir login"
+no [README principal](../../README.md#5-exigir-login-e-identificar-o-usuário-liferay) para
+o link que deve realmente ser divulgado.
 
 ## Atualizando depois de mudar o app
 
 1. Copie os arquivos atualizados para dentro de `static/`.
-2. Abra o `MANIFEST.MF` e aumente o `Bundle-Version` (ex: `1.0.0` → `1.0.1`) — isso evita
-   conflito com a versão já instalada.
+2. Abra o `MANIFEST.MF` e **aumente o `Bundle-Version`** (ex: `1.1.0` → `1.2.0`) — isso evita
+   conflito com a versão já instalada e deixa claro no Gerenciador de Aplicativos que é uma
+   versão nova. O `build.bat` mostra a versão empacotada no final, use isso para conferir
+   antes de subir.
 3. Rode `build.bat` de novo.
 4. Volte no Gerenciador de Aplicativos e faça **Upload** do novo `.jar` — ele substitui a
-   versão anterior automaticamente.
+   versão anterior automaticamente (não precisa remover/desativar a antiga antes).
 
 ## Problemas comuns
 
@@ -100,6 +109,6 @@ automaticamente.) Use exatamente essa URL no link do portal.
 - **App aparece como "Installed" mas não "Active"**: normalmente é erro de resolução de
   pacote. Confira nos logs do Liferay (`[LIFERAY_HOME]/logs`) ou em **Painel de Controle >
   Configuração > Logs de Log4j** por mensagens citando `com.trt.scannertombos.web`.
-- **404 ao acessar `/scanner-tombos/index.html`**: confirme que o app está "Active" no
-  Gerenciador de Aplicativos e que não existe outro módulo já registrando o mesmo padrão de
-  URL.
+- **404 ao acessar**: confirme que usou o prefixo `/o/` (`/o/scanner-tombos/index.html`, não
+  `/scanner-tombos/index.html`), que o app está "Active" no Gerenciador de Aplicativos, e que
+  não existe outro módulo já registrando o mesmo padrão de URL.
