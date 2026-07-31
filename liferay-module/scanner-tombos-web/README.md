@@ -100,12 +100,13 @@ o link que deve realmente ser divulgado.
    versão nova. O `build.bat` mostra a versão empacotada no final, use isso para conferir
    antes de subir.
 3. Rode `build.bat` de novo.
-4. Volte no Gerenciador de Aplicativos e faça **Upload** do novo `.jar` — ele substitui a
-   versão anterior automaticamente (não precisa remover/desativar a antiga antes), **desde
-   que o `Bundle-SymbolicName` não tenha mudado**. Se o `Bundle-SymbolicName` mudar (por
-   exemplo, numa renomeação de pacote), o Liferay trata como um módulo totalmente novo — o
-   antigo fica instalado em paralelo e precisa ser removido manualmente no Gerenciador de
-   Aplicativos.
+4. Volte no Gerenciador de Aplicativos e faça **Upload** do novo `.jar`.
+5. **Desinstale a versão anterior manualmente** (menu **⋮** ao lado da versão antiga na
+   lista de apps > desinstalar/remover). Na prática, o Liferay **não substitui** a versão
+   antiga automaticamente ao subir uma nova — as duas ficam instaladas lado a lado, ambas
+   "Ativas", e como registram o mesmo padrão de URL (`/scanner-tombos/*`), fica ambíguo qual
+   delas está realmente servindo as requisições. Sempre confira na lista de apps que só
+   existe **uma** versão do "TRT - Scanner de Tombos" depois de atualizar.
 
 ## Problemas comuns
 
