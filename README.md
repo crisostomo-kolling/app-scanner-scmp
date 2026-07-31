@@ -85,17 +85,13 @@ Para montar isso no Liferay:
    Cole:
    ```html
    <script>
-     function abrirScanner(nome) {
-       var segundos = 3;
-       var contadorEl = document.getElementById('contador');
-       var intervalo = setInterval(function () {
-         segundos -= 1;
-         if (contadorEl) contadorEl.textContent = segundos;
-         if (segundos <= 0) {
-           clearInterval(intervalo);
-           window.location.replace('/o/scanner-tombos/index.html?usuario=' + encodeURIComponent(nome));
-         }
-       }, 1000);
+     var nomeUsuario = null;
+
+     function atualizarLink() {
+       var link = document.getElementById('linkAbrir');
+       if (!link || !nomeUsuario) return;
+       link.href = '/o/scanner-tombos/index.html?usuario=' + encodeURIComponent(nomeUsuario);
+       link.textContent = 'Abrir o Scanner de Tombos (usuário: ' + nomeUsuario + ')';
      }
 
      function iniciar() {
@@ -103,11 +99,24 @@ Para montar isso no Liferay:
          document.body.innerHTML = '<p>Não foi possível identificar seu usuário. Faça login novamente.</p>';
          return;
        }
-       var userId = Liferay.ThemeDisplay.getUserId();
-       Liferay.Service.Portal.User.getUserById({ userId: userId }, function (user) {
-         var nome = (user && user.screenName) ? user.screenName : Liferay.ThemeDisplay.getUserName();
-         abrirScanner(nome);
-       });
+
+       // Mostra o link de imediato com o nome completo (sempre disponível).
+       nomeUsuario = Liferay.ThemeDisplay.getUserName();
+       atualizarLink();
+
+       // Em paralelo, tenta trocar pelo login (screenName); se conseguir a tempo do clique,
+       // atualiza o link sozinho. Se falhar/demorar, o link acima continua funcionando.
+       try {
+         var userId = Liferay.ThemeDisplay.getUserId();
+         Liferay.Service.Portal.User.getUserById({ userId: userId }, function (user) {
+           if (user && user.screenName) {
+             nomeUsuario = user.screenName;
+             atualizarLink();
+           }
+         });
+       } catch (e) {
+         // mantem o nome completo ja exibido
+       }
      }
 
      if (document.readyState === 'loading') {
@@ -116,18 +125,24 @@ Para montar isso no Liferay:
        iniciar();
      }
    </script>
-   <p>Abrindo o Scanner de Tombos em <span id="contador">3</span> segundos...</p>
+   <p style="text-align:center;">
+     <a id="linkAbrir" href="#"
+        style="display:inline-block;padding:14px 24px;background:#2563eb;color:#fff;
+               border-radius:10px;text-decoration:none;font-weight:600;">
+       Carregando...
+     </a>
+   </p>
    ```
-   Isso usa `Liferay.ThemeDisplay` (disponível em toda página para o usuário logado) e
-   `Liferay.Service.Portal.User.getUserById` (chamada autenticada que busca o `screenName` —
-   o login do usuário, não o nome completo) para identificar quem está acessando, mostra uma
-   contagem regressiva de 3 segundos e então redireciona a aba inteira para o app. O app abre
-   em tela cheia, sem o menu/tema do Liferay em volta, já com o usuário correto.
+   Isso usa `Liferay.ThemeDisplay` (disponível em toda página para o usuário logado) para
+   mostrar de imediato um link clicável com o nome completo, e tenta em paralelo trocar pelo
+   login (`screenName`, via `Liferay.Service.Portal.User.getUserById`) antes de você clicar —
+   sem depender de temporizador nem de redirecionamento automático. Ao tocar no link, o app
+   abre em tela cheia, sem o menu/tema do Liferay em volta, com o usuário já identificado.
 
-   *(Se por algum motivo a busca do `screenName` falhar — por exemplo, alguma política de
-   acesso a serviços bloqueando a chamada —, o código cai de volta para
-   `Liferay.ThemeDisplay.getUserName()`, que mostra o nome completo em vez do login. Se isso
-   acontecer, me avisa que investigamos.)*
+   *(Se o link continuar mostrando o nome completo em vez do login mesmo depois de alguns
+   segundos, é sinal de que a busca do `screenName` está sendo bloqueada — possivelmente
+   alguma Política de Acesso a Serviços do Liferay. Nesse caso funciona do mesmo jeito, só
+   identifica pelo nome completo; me avisa se quiser investigar o bloqueio.)*
 
    *(Tentativas anteriores com `${themeDisplay.getUser().getScreenName()}` dentro de um
    Conteúdo Web básico não funcionam: esse placeholder só é processado quando o artigo usa
